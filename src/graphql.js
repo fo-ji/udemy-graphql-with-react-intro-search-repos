@@ -16,6 +16,7 @@ export const SEARCH_REPOSITORIES = gql`
       query: $query
       type: REPOSITORY
     ) {
+      repositoryCount
       pageInfo {
         endCursor
         hasNextPage

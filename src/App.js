@@ -16,9 +16,23 @@ const INITIAL_VARIABLES = {
 function App() {
   const [variables, setVariables] = useState(INITIAL_VARIABLES)
 
+  const handleChange = (e) => {
+    setVariables({
+      ...INITIAL_VARIABLES,
+      query: e.target.value,
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+  }
+
   return (
     <ApolloProvider client={client}>
-      <Query query={SEARCH_REPOSITORIES} variables={{ ...variables }}>
+      <form onSubmit={handleSubmit}>
+        <input value={variables.query} onChange={handleChange} />
+      </form>
+      <Query query={SEARCH_REPOSITORIES} variables={variables}>
         {({ loading, error, data }) => {
           if (loading) return 'Loading...'
           if (error) return `Error! ${error.message}`
