@@ -1,8 +1,33 @@
-const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN
-console.log('GITHUB_TOKEN: ', { GITHUB_TOKEN })
+import { ApolloProvider } from 'react-apollo'
+import gql from 'graphql-tag'
+import { Query } from 'react-apollo'
+
+import client from './client'
+
+const ME = gql`
+  query me {
+    user(login: "iteachonudemy") {
+      name
+      avatarUrl
+    }
+  }
+`
 
 function App() {
-  return <div>Hello, GraphQL!</div>
+  return (
+    <ApolloProvider client={client}>
+      <div>hello, GraphQL</div>
+
+      <Query query={ME}>
+        {({ loading, error, data }) => {
+          if (loading) return 'Loading...'
+          if (error) return `Error! ${error.message}`
+
+          return <div>{data.user.name}</div>
+        }}
+      </Query>
+    </ApolloProvider>
+  )
 }
 
 export default App
