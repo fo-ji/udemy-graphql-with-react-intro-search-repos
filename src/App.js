@@ -18,6 +18,33 @@ const StarButton = (props) => {
         onClick={() => {
           addOrRemoveStar({
             variables: { input: { starrableId: node.id } },
+
+            // データをfetchせず、ブラウザで持っているキャッシュを更新する
+            update: (store, { data: { addStar, removeStar } }) => {
+              const { starrable } = addStar || removeStar
+              console.log('starrable: ', { starrable })
+
+              const data = store.readQuery({
+                query: SEARCH_REPOSITORIES,
+                variables: variables,
+              })
+              const edges = data.search.edges
+              const newEdges = edges.map((edge) => {
+                if (edge.node.id === node.id) {
+                  const totalCount = edge.node.stargazers.totalCount
+                  // const diff = viewerHasStarred ? 1 : -1
+                  const diff = starrable.viewerHasStarred ? 1 : -1
+                  const newTotalCount = totalCount + diff
+                  edge.node.stargazers.totalCount = newTotalCount
+                }
+                return edge
+              })
+              data.search.edges = newEdges
+              store.writeQuery({
+                query: SEARCH_REPOSITORIES,
+                data,
+              })
+            },
           })
         }}
       >
@@ -29,7 +56,7 @@ const StarButton = (props) => {
   return (
     <Mutation
       mutation={viewerHasStarred ? REMOVE_STAR : ADD_STAR}
-      // 配列を指定するパターン
+      // データをfetchして、配列を指定するパターン
       // refetchQueries={[
       //   {
       //     query: SEARCH_REPOSITORIES,
@@ -38,15 +65,15 @@ const StarButton = (props) => {
       // ]}
 
       // 関数も受け取れる
-      refetchQueries={(mutationResult) => {
-        console.log({ mutationResult })
-        return [
-          {
-            query: SEARCH_REPOSITORIES,
-            variables: variables,
-          },
-        ]
-      }}
+      // refetchQueries={(mutationResult) => {
+      //   console.log({ mutationResult })
+      //   return [
+      //     {
+      //       query: SEARCH_REPOSITORIES,
+      //       variables: variables,
+      //     },
+      //   ]
+      // }}
     >
       {(addOrRemoveStar) => {
         return <StarStatus addOrRemoveStar={addOrRemoveStar} />
