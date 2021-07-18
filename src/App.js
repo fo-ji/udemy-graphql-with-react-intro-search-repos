@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { ApolloProvider, Query, Mutation } from 'react-apollo'
 
 import client from './client'
@@ -88,21 +88,19 @@ const INITIAL_VARIABLES = {
   after: null,
   last: null,
   before: null,
-  query: 'フロントエンドエンジニア',
+  query: '',
 }
 
 function App() {
   const [variables, setVariables] = useState(INITIAL_VARIABLES)
-
-  const handleChange = (e) => {
-    setVariables({
-      ...INITIAL_VARIABLES,
-      query: e.target.value,
-    })
-  }
+  const myRef = useRef(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    setVariables((prevState) => {
+      return { ...prevState, query: myRef.current.value }
+    })
   }
 
   const goNext = (search) => {
@@ -126,7 +124,8 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <form onSubmit={handleSubmit}>
-        <input value={variables.query} onChange={handleChange} />
+        <input ref={myRef} />
+        <input type="submit" value="Submit" />
       </form>
       <Query query={SEARCH_REPOSITORIES} variables={variables}>
         {({ loading, error, data }) => {
